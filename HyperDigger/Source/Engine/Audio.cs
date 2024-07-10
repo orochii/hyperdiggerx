@@ -13,6 +13,9 @@ namespace HyperDigger
         bool isFading = false;
         Channel FadingBGM;
 
+        ChannelGroup BGMGroup;
+        ChannelGroup SFXGroup;
+
         public Audio() {
             _nativeLibrary = new DesktopNativeFmodLibrary();
         }
@@ -20,6 +23,8 @@ namespace HyperDigger
         internal void Initialize()
         {
             FmodManager.Init(_nativeLibrary, FmodInitMode.CoreAndStudio, "Content");
+            BGMGroup = new ChannelGroup("BGM");
+            SFXGroup = new ChannelGroup("SFX");
         }
 
         public void Update(GameTime gameTime)
@@ -39,7 +44,7 @@ namespace HyperDigger
         public Channel PlaySFX(string sfxName, float volume, float pitch)
         {
             var sound = Globals.Cache.LoadSound("Audio/SFX/" + sfxName);
-            var channel = sound.Play();
+            var channel = sound.Play(SFXGroup);
             channel.Volume = volume;
             channel.Pitch = pitch;
             return channel;
@@ -71,7 +76,7 @@ namespace HyperDigger
             if (bgmName.Length > 0)
             {
                 var sound = Globals.Cache.LoadSound("Audio/BGM/" + currentBGMName);
-                PlayingBGM = sound.Play();
+                PlayingBGM = sound.Play(BGMGroup);
                 PlayingBGM.Looping = true;
                 isPlaying = true;
             }
