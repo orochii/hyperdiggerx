@@ -14,6 +14,7 @@ namespace HyperDigger
         protected override void Initialize()
         {
             Globals.Graphics.Initialize();
+            Globals.Audio.Initialize();
             base.Initialize();
         }
 
@@ -44,6 +45,11 @@ namespace HyperDigger
             Globals.Graphics.EndRender();
 
             base.Draw(gameTime);
+        }
+        protected override void UnloadContent()
+        {
+            Globals.Cache.FlushAll();
+            base.UnloadContent();
         }
     }
 }

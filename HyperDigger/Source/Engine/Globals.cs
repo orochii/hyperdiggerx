@@ -17,6 +17,7 @@ namespace HyperDigger
     class Globals
     {
         public static Graphics Graphics;
+        public static Audio Audio;
         public static Cache Cache;
         public static Input Input;
         public static SceneStack SceneStack;
@@ -26,6 +27,7 @@ namespace HyperDigger
         {
             Database = new Database();
             Graphics = new Graphics(g);
+            Audio = new Audio();
             Cache = new Cache();
             Input = new Input();
             SceneStack = new SceneStack();

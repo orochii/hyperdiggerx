@@ -11,21 +11,27 @@ namespace HyperDigger
         LDtkFile File;
         LDtkWorld World;
         TilemapRenderer Renderer;
-        Viewport _viewport;
+        Container _container;
+        Container _innerContainer;
         TilemapLevel[] Levels;
         public TilemapLevel CurrentLevel {  get; private set; }
         List<TilemapLevel> ActiveLevels = new List<TilemapLevel>();
-        
-        public Viewport Viewport { 
-            get { return _viewport; } 
+        List<GameObject> GlobalEntities = new List<GameObject>();
+        public GameObject ViewTarget;
+
+        public Container Container { 
+            get { return _container; } 
             set { 
-                _viewport = value;
+                _container = value;
                 
             }
         }
 
-        public TilemapWorld(Viewport viewport, String filename, int worldIdx = 0) {
-            Viewport = viewport;
+        public Container InnerContainer { get { return _innerContainer; } }
+        
+        public TilemapWorld(Container container, String filename, int worldIdx = 0) {
+            _innerContainer = new Container(container);
+            Container = container;
             // Load file
             File = LDtkFile.FromFile(filename, Globals.Cache.content);
 
@@ -34,14 +40,14 @@ namespace HyperDigger
             World = File.LoadWorld(File.Worlds[worldIdx].Iid);
 
             // Create renderer
-            Renderer = new TilemapRenderer(Globals.Graphics.SpriteBatch, Globals.Cache.content);
+            Renderer = new TilemapRenderer(Globals.Graphics.SpriteBatch);
 
             // Load levels here.
             Levels = new TilemapLevel[World.Levels.Length];
             for (int i = 0; i < World.Levels.Length; i++)
             {
                 LDtkLevel level = World.Levels[i];
-                var tilemapLevel = new TilemapLevel(level, Renderer);
+                var tilemapLevel = new TilemapLevel(this, level, Renderer);
                 Levels[i] = tilemapLevel;
             }
         }
@@ -73,21 +79,21 @@ namespace HyperDigger
             return foundIdx;
         }
 
-        public bool CheckCollisionWithWorld(int cx, int cy, Vector2 boundarySize)
+        public bool CheckCollisionWithWorld(GameObject requester, int cx, int cy, Vector2 boundarySize)
         {
             foreach (var l in ActiveLevels)
             {
-                if (l.CheckCollisionWithEntities(cx, cy, boundarySize)) return true;
+                if (l.CheckCollisionWithEntities(requester, cx, cy, boundarySize)) return true;
             }
 
             for (int x = 0; x <= boundarySize.X; x++)
             {
-                int xx = x * IEntities.BOUND_UNIT;
+                int xx = x * ICollision.BOUND_UNIT;
                 int xl = cx + xx;
                 int xr = cx - xx;
                 for (int y = 0; y <= boundarySize.Y; y++)
                 {
-                    int yy = y * IEntities.BOUND_UNIT;
+                    int yy = y * ICollision.BOUND_UNIT;
                     int yc = cy - yy;
 
                     var ll = GetActiveLevelInBoundaries(xl, yc);
@@ -159,11 +165,41 @@ namespace HyperDigger
             ActiveLevels = newActiveLevels;
             foreach (var l in ActiveLevels)
             {
-                l.Set(_viewport);
+                l.Set(_innerContainer);
             }
         }
 
-        internal Rectangle GetCurrentBoundaries()
+        internal void Update(GameTime gameTime)
+        {
+            foreach(var e in GlobalEntities)
+            {
+                e.Update(gameTime);
+            }
+            CurrentLevel.Update(gameTime);
+            // Update view
+            SetActiveLevelByBoundaries((int)ViewTarget.Position.X, (int)ViewTarget.Position.Y);
+            // Follow player
+            InnerContainer.Position.X = (Globals.Graphics.Width / 2) - ViewTarget.Position.X;
+            InnerContainer.Position.Y = (Globals.Graphics.Height / 2) - ViewTarget.Position.Y;
+            ClampViewToBoundaries();
+        }
+
+        private void ClampViewToBoundaries()
+        {
+            var boundaries = GetCurrentBoundaries();
+            if (boundaries.Width == 0) return;
+
+            var minX = boundaries.Left;
+            var minY = boundaries.Top;
+            var maxX = boundaries.Right - Globals.Graphics.Width;
+            var maxY = boundaries.Bottom - Globals.Graphics.Height;
+            maxX = Math.Max(minX, maxX);
+            maxY = Math.Max(minY, maxY);
+            InnerContainer.Position.X = Math.Clamp(InnerContainer.Position.X, -maxX, -minX);
+            InnerContainer.Position.Y = Math.Clamp(InnerContainer.Position.Y, -maxY, -minY);
+        }
+
+        public Rectangle GetCurrentBoundaries()
         {
             if (CurrentLevel != null)
                 return CurrentLevel.GetBoundaries();
@@ -171,9 +207,10 @@ namespace HyperDigger
             return new Rectangle();
         }
 
-        internal void Update(GameTime gameTime)
+        public void AddEntity(GameObject entity)
         {
-            CurrentLevel.Update(gameTime);
+            GlobalEntities.Add(entity);
+            entity.World = this;
         }
     }
 }

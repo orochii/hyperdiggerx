@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace HyperDigger
 {
-    class Sprite : GraphicObject
+    class Sprite : GameObject
     {
         public Texture2D Texture = null;
         public Rectangle SourceRect = new Rectangle(0, 0, 0, 0);
@@ -14,9 +14,9 @@ namespace HyperDigger
         public SpriteEffects Effects = SpriteEffects.None;
 
         public Sprite() { }
-        public Sprite(Viewport _viewport = null)
+        public Sprite(Container _container = null)
         {
-            Viewport = _viewport;
+            Container = _container;
         }
 
         public override void Draw()
@@ -39,9 +39,9 @@ namespace HyperDigger
 
         public override string ToString()
         {
-            if (Viewport != null)
+            if (Container != null)
             {
-                return "HyperDigger.Sprite " + Name + "(on " + Viewport.Name + ")";
+                return "HyperDigger.Sprite " + Name + "(on " + Container.Name + ")";
             }
             return "HyperDigger.Sprite " + Name;
         }

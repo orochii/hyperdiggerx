@@ -9,14 +9,16 @@ namespace HyperDigger
 {
     class TilemapLevel
     {
+        public TilemapWorld World { get; private set; }
         LDtkLevel Level;
         TilemapRenderer Renderer;
         Sprite[] Layers = new Sprite[0];
-        List<IEntities> Entities = new List<IEntities>();
+        List<GameObject> Entities = new List<GameObject>();
 
         public string Identifier { get { return Level.Identifier; } }
 
-        public TilemapLevel(LDtkLevel level, TilemapRenderer renderer) {
+        public TilemapLevel(TilemapWorld world, LDtkLevel level, TilemapRenderer renderer) {
+            World = world;
             Level = level;
             Renderer = renderer;
             //Level.LayerInstances[0]._Identifier;
@@ -53,14 +55,14 @@ namespace HyperDigger
             }
         }
 
-        public void Set(Viewport v)
+        public void Set(Container v)
         {
             // Prerender
             var l = Renderer.PrerenderLevel(Level);
             for (int i = 0; i < l.Layers.Length; i++)
             {
                 Layers[i].Texture = l.Layers[i];
-                Layers[i].Viewport = v;
+                Layers[i].Container = v;
             }
         }
 
@@ -74,11 +76,16 @@ namespace HyperDigger
             return (x >= cx && y > cy) && (x < cw && y < ch);
         }
 
-        internal bool CheckCollisionWithEntities(int cx, int cy, Vector2 boundarySize)
+        internal bool CheckCollisionWithEntities(GameObject requester, int cx, int cy, Vector2 boundarySize)
         {
             foreach (var entity in Entities)
             {
-                if (entity.CollidesWith(cx, cy, boundarySize)) return true;
+                if (entity == requester) continue;
+                if (entity is ICollision)
+                {
+                    var collider = entity as ICollision;
+                    if (collider.CollidesWith(cx, cy, boundarySize)) return true;
+                }
             }
             return false;
         }
@@ -128,11 +135,11 @@ namespace HyperDigger
 
         internal void Update(GameTime gameTime)
         {
-            foreach (var entity in Entities)
+            foreach(var entity in Entities)
             {
-                entity.DoUpdate(gameTime);
+                entity.Update(gameTime);
             }
-
+#if DEBUG
             if (Globals.Input.IsTriggered(Input.Button.ESCAPE))
             {
                 var n = Globals.Input.GetDir8();
@@ -144,6 +151,7 @@ namespace HyperDigger
                     System.Console.WriteLine("Layer {0} set to {1} - {2}", Layers[n].Name, Layers[n].Visible, Layers[n].Texture);
                 }
             }
+#endif
         }
 
         internal int[] GetTileIdAt(Vector2 worldPos)

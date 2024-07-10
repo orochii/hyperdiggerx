@@ -4,12 +4,12 @@ using LDtk.Renderer;
 
 namespace HyperDigger
 {
-    class TilemapLayer : GraphicObject
+    class TilemapLayer : GameObject
     {
         public TilemapLayer() { }
-        public TilemapLayer(Viewport _viewport = null)
+        public TilemapLayer(Container _container = null)
         {
-            Viewport = _viewport;
+            Container = _container;
         }
 
         public override void Update(GameTime gameTime)

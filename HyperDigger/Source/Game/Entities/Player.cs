@@ -1,40 +1,55 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.ComponentModel.Design;
-using System.Xml.Linq;
-using static HyperDigger.Animations;
 
 namespace HyperDigger
 {
-    internal class Player : Sprite, IEntities
+    internal class Player : Sprite, ICollision
     {
+        /*
+         * JUMP TODO:
+         * Anti-gravity Apex --DONE
+         * Jump Buffering --DONE
+         * Clamp Fall Speed --DONE
+         * Coyote Time
+         * Early Fall
+         * Sticky Feet on Land
+         * Speedy Apex
+         * Catch Missed Jump
+         * Bumped Head on Corner
+         */
+
         const float GRAVITY = 20f;
         const float WALK_SPEED = 2f;
         const float MAX_YSPEED = 10f;
         const float WALK_ACCEL = 20f;
-        const float DEACCEL = 5f;
+        const float DEACCEL = 15f;
         const float JUMP_FORCE = 6f;
+        const float COYOTE_TIME = 0.1f;
+        const float APEX_RANGE = 1.0f;
+        const float APEX_MULTIPLIER = 0.6f;
+        private const float JUMP_BUFFER_TIME = 0.1f;
 
-        public TilemapWorld World;
         Vector2 BoundarySize;
         Vector2 Speed;
         bool IsGrounded = false;
+        float jumpRequest = 0;
+        float coyoteTime = 0;
 
         Animations.AnimEntry animEntry;
         Animations.EAnimType moveState = Animations.EAnimType.IDLE;
         Animations.EAnimType overlayState = Animations.EAnimType.IDLE;
         float animFrame = 0;
 
-        public Player(Viewport viewport) : base(viewport) {
+        public Player(Container container) : base(container) {
             Depth = 1;
             Name = "Ari";
             BoundarySize = new Vector2(1,7);
             //Position = new Vector2(Globals.Graphics.Width / 2, Globals.Graphics.Height / 2);
-            Texture = Globals.Cache.content.Load<Texture2D>("Graphics/Character/ari");
+            Texture = Globals.Cache.LoadTexture("Graphics/Character/ari");
             animEntry = Globals.Database.Animations.Get("ari");
             SourceRect = new Rectangle(0, 0, animEntry.frameWidth, animEntry.frameHeight);
-            Origin = new Vector2(SourceRect.Width / 2, SourceRect.Height);
+            Origin = new Vector2(SourceRect.Width / 2, SourceRect.Height-1);
         }
 
         public override void Update(GameTime gameTime)
@@ -43,13 +58,24 @@ namespace HyperDigger
             // Read input
             var horz = Globals.Input.GetHorz();
             var jump = Globals.Input.IsTriggered(Input.Button.JUMP);
+            if (jump) jumpRequest = JUMP_BUFFER_TIME;
             var prevState = GetCurrentAnimState();
+            // Advance/reset coyote time
+            if (IsGrounded) coyoteTime = COYOTE_TIME;
+            else if (coyoteTime > 0) coyoteTime -= d;
             // Apply gravity
-            Speed.Y += d * GRAVITY;
+            if (!IsGrounded && Math.Abs(Speed.Y) < APEX_RANGE)
+            {
+                Speed.Y += d * GRAVITY * APEX_MULTIPLIER;
+            }
+            else Speed.Y += d * GRAVITY;
+
             // Apply movement
-            if (IsGrounded && jump)
+            if (coyoteTime>0 && jumpRequest>0)
             {
                 Speed.Y = -JUMP_FORCE;
+                coyoteTime = 0;
+                jumpRequest = 0;
             }
             if (horz != 0)
             {
@@ -69,34 +95,40 @@ namespace HyperDigger
 
             // Check collisions
             IsGrounded = false;
+            if (IsColliding((int)Position.X, (int)Position.Y))
+            {
+                Position.Y -= 1;
+            }
             Vector2 NextPosition = Position + Speed;
+            
             while (IsColliding((int)Position.X, (int)NextPosition.Y))
             {
-                //NextPosition.X = HyperMath.MoveTowards(NextPosition.X, Position.X, 1);
-                if (NextPosition.Y == Position.Y)
-                {
-                    Position.Y -= 1;
-                    NextPosition.Y = Position.Y;
-                } else
-                {
-                    NextPosition.Y = HyperMath.MoveTowards(NextPosition.Y, Position.Y, 1);
-                }
+                if (Speed.Y > 0) IsGrounded = true;
                 Speed.Y = 0;
-                IsGrounded = true;
+                
+                NextPosition.Y = HyperMath.MoveTowards(NextPosition.Y, Position.Y, 1);
+                if (NextPosition.Y == Position.Y) break;
             }
-            while (IsColliding((int)NextPosition.X, (int)Position.Y))
+            while (IsColliding((int)NextPosition.X, (int)NextPosition.Y))
             {
-                //NextPosition.X = HyperMath.MoveTowards(NextPosition.X, Position.X, 1);
-                NextPosition.X = HyperMath.MoveTowards(NextPosition.X, Position.X, 1);
                 Speed.X = 0;
+
+                NextPosition.X = HyperMath.MoveTowards(NextPosition.X, Position.X, 1);
+                if (NextPosition.X == Position.X) break;
             }
             // Apply
             Position.X = NextPosition.X;
             Position.Y = NextPosition.Y;
             //
-            if (prevState != GetCurrentAnimState()) animFrame = 0;
+            if (prevState != GetCurrentAnimState())
+            {
+                animFrame = 0;
+                _lastFrame = -1;
+            }
             // Update animation
             AdvanceAnimation(horz, d);
+            //
+            jumpRequest -= d;
         }
 
         private Animations.EAnimType GetCurrentAnimState()
@@ -105,6 +137,7 @@ namespace HyperDigger
             return moveState;
         }
 
+        private int _lastFrame = 0;
         private void AdvanceAnimation(float horz, float delta)
         {
             if (horz != 0)
@@ -120,26 +153,36 @@ namespace HyperDigger
             {
                 animFrame -= state.frames.Count;
             }
-            var currFrame = state.frames[(int)animFrame];
+            var floorAnimFrame = (int)animFrame;
+            var currFrame = state.frames[floorAnimFrame];
             SourceRect.X = currFrame.X * animEntry.frameWidth;
             SourceRect.Y = currFrame.Y * animEntry.frameWidth;
+            if (_lastFrame != floorAnimFrame)
+            {
+                _lastFrame = floorAnimFrame;
+                if (state.events.TryGetValue(_lastFrame, out var ev))
+                {
+                    Globals.Audio.PlaySFXAt(ev.name, ev.volume, ev.pitch, GlobalPosition);
+                    System.Console.WriteLine("Play sound {0}", ev.name);
+                }
+            }
         }
 
         public bool IsColliding(int tx, int ty)
         {
             if (World == null) return false;
 
-            return World.CheckCollisionWithWorld(tx, ty, BoundarySize);
+            return World.CheckCollisionWithWorld(this, tx, ty, BoundarySize);
         }
 
         public bool CollidesWith(int x, int y, Vector2 boundarySize)
         {
-            float otherSizeX = boundarySize.X * IEntities.BOUND_UNIT;
-            float otherSizeY = boundarySize.Y * IEntities.BOUND_UNIT / 2;
+            float otherSizeX = boundarySize.X * ICollision.BOUND_UNIT;
+            float otherSizeY = boundarySize.Y * ICollision.BOUND_UNIT / 2;
             float xOther = x;
             float yOther = y - otherSizeY;
-            float thisSizeX = BoundarySize.X * IEntities.BOUND_UNIT;
-            float thisSizeY = BoundarySize.Y * IEntities.BOUND_UNIT / 2;
+            float thisSizeX = BoundarySize.X * ICollision.BOUND_UNIT;
+            float thisSizeY = BoundarySize.Y * ICollision.BOUND_UNIT / 2;
             float xThis = Position.X;
             float yThis = Position.Y - thisSizeY;
             float deltaX = xOther - xThis;

@@ -30,7 +30,7 @@ public class TilemapRenderer : IDisposable
     readonly Texture2D pixel;
     readonly Texture2D error;
     readonly GraphicsDevice graphicsDevice;
-    readonly ContentManager? content;
+    //readonly ContentManager? content;
 
     /// <summary> Initializes a new instance of the <see cref="TilemapRenderer"/> class. This is used to intizialize the renderer for use with direct file loading. </summary>
     /// <param name="spriteBatch">Spritebatch</param>
@@ -61,11 +61,11 @@ public class TilemapRenderer : IDisposable
     /// <summary> Initializes a new instance of the <see cref="TilemapRenderer"/> class. This is used to intizialize the renderer for use with content Pipeline. </summary>
     /// <param name="spriteBatch">SpriteBatch</param>
     /// <param name="content">Optional ContentManager</param>
-    public TilemapRenderer(SpriteBatch spriteBatch, ContentManager content)
+    /*public TilemapRenderer(SpriteBatch spriteBatch, ContentManager content)
         : this(spriteBatch)
     {
         this.content = content;
-    }
+    }*/
 
     /// <summary> Prerender out the level to textures to optimize the rendering process. </summary>
     /// <param name="level">The level to prerender.</param>
@@ -208,7 +208,7 @@ public class TilemapRenderer : IDisposable
         }
 
         Texture2D tilemap;
-        if (content == null)
+        /*if (content == null)
         {
             string directory = Path.GetDirectoryName(level.WorldFilePath)!;
             string assetName = Path.Join(directory, path);
@@ -220,7 +220,11 @@ public class TilemapRenderer : IDisposable
             string directory = Path.GetDirectoryName(level.WorldFilePath)!;
             string assetName = Path.Join(directory, file);
             tilemap = content.Load<Texture2D>(assetName);
-        }
+        }*/
+        string file = Path.ChangeExtension(path, null);
+        string directory = Path.GetDirectoryName(level.WorldFilePath)!;
+        string assetName = Path.Join(directory, file);
+        tilemap = Globals.Cache.LoadTexture(assetName);
 
         TilemapCache.Add(path, tilemap);
 

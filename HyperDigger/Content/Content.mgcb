@@ -14,29 +14,11 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Graphics/Backgrounds/sky_1.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/Backgrounds/sky_1.png
+#begin Audio/BGM/That Zen Moment.mp3
+/copy:Audio/BGM/That Zen Moment.mp3
 
-#begin Graphics/Backgrounds/sky_1.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/Backgrounds/sky_1.png
+#begin Audio/SFX/step.ogg
+/copy:Audio/SFX/step.ogg
 
 #begin Graphics/Backgrounds/sky_1.png
 /importer:TextureImporter
@@ -74,7 +56,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/Character/hikari_battler.png
 
-#begin Graphics/Character/hikari_battler.png
+#begin Graphics/System/HUD.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -84,31 +66,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/Character/hikari_battler.png
-
-#begin Graphics/Tilesets/ground_tile.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/Tilesets/ground_tile.png
-
-#begin Graphics/Tilesets/ground_tile.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/Tilesets/ground_tile.png
+/build:Graphics/System/HUD.png
 
 #begin Graphics/Tilesets/ground_tile.png
 /importer:TextureImporter

@@ -4,15 +4,15 @@ namespace HyperDigger
 {
     internal class BaseScene
     {
-        public Viewport Viewport;
+        public Container Container;
 
         public BaseScene() {
-            Viewport = new Viewport();
-            Viewport.Name = "BaseSceneViewport";
+            Container = new Container();
+            Container.Name = "BaseSceneContainer";
         }
         public void Draw()
         {
-            Viewport.Draw();
+            Container.Draw();
         }
 
         /* public void Setup(params) {} */
