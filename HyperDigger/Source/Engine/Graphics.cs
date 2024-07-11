@@ -20,6 +20,7 @@ namespace HyperDigger
         private Rectangle _actualScreenRectangle;
         public SpriteBatch SpriteBatch { get {  return _spriteBatch; } }
         private SpriteBatch _spriteBatch;
+        Texture2D _dotTexture;
 
         public Graphics(Game g)
         {
@@ -31,6 +32,9 @@ namespace HyperDigger
         {
             SetScale(_scale);
             _spriteBatch = new SpriteBatch(_game.GraphicsDevice);
+            // For drawing operations.
+            _dotTexture = new Texture2D(_game.GraphicsDevice, 1, 1);
+            _dotTexture.SetData(new Color[] { Color.White });
         }
 
         internal void StartRender()
@@ -57,6 +61,16 @@ namespace HyperDigger
             _graphics.PreferredBackBufferWidth = _actualScreenRectangle.Width;
             _graphics.PreferredBackBufferHeight = _actualScreenRectangle.Height;
             _graphics.ApplyChanges();
+        }
+
+        public void DrawDot(Vector2 position, Color color)
+        {
+            SpriteBatch.Draw(_dotTexture, position, color);
+        }
+
+        public void DrawRectangle(Rectangle rect, Color color)
+        {
+            SpriteBatch.Draw(_dotTexture, rect, color);
         }
     }
 }

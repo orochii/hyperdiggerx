@@ -1,27 +1,26 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace HyperDigger
 {
-    internal class Player : Sprite, ICollision
+    internal class Player : MovingBody
     {
         /*
          * JUMP TODO:
          * Anti-gravity Apex --DONE
          * Jump Buffering --DONE
          * Clamp Fall Speed --DONE
-         * Coyote Time
-         * Early Fall
+         * Coyote Time --DONE
+         * Early Fall --DONE
          * Sticky Feet on Land
          * Speedy Apex
          * Catch Missed Jump
          * Bumped Head on Corner
          */
 
-        const float GRAVITY = 20f;
         const float WALK_SPEED = 2f;
-        const float MAX_YSPEED = 10f;
         const float WALK_ACCEL = 20f;
         const float DEACCEL = 15f;
         const float JUMP_FORCE = 6f;
@@ -30,9 +29,7 @@ namespace HyperDigger
         const float APEX_MULTIPLIER = 0.6f;
         private const float JUMP_BUFFER_TIME = 0.1f;
 
-        Vector2 BoundarySize;
-        Vector2 Speed;
-        bool IsGrounded = false;
+        bool IsJumping = false;
         float jumpRequest = 0;
         float coyoteTime = 0;
 
@@ -42,14 +39,14 @@ namespace HyperDigger
         float animFrame = 0;
 
         public Player(Container container) : base(container) {
-            Depth = 1;
-            Name = "Ari";
-            BoundarySize = new Vector2(1,7);
-            //Position = new Vector2(Globals.Graphics.Width / 2, Globals.Graphics.Height / 2);
             Texture = Globals.Cache.LoadTexture("Graphics/Character/ari");
             animEntry = Globals.Database.Animations.Get("ari");
+            Depth = 1;
+            Name = "Ari";
             SourceRect = new Rectangle(0, 0, animEntry.frameWidth, animEntry.frameHeight);
-            Origin = new Vector2(SourceRect.Width / 2, SourceRect.Height-1);
+            Origin = new Vector2(animEntry.frameWidth / 2, animEntry.frameHeight - 1);
+            Collider.BoundarySize = new Vector2(4,14);
+            Collider.Offset = new Vector2(0,-14);
         }
 
         public override void Update(GameTime gameTime)
@@ -58,24 +55,20 @@ namespace HyperDigger
             // Read input
             var horz = Globals.Input.GetHorz();
             var jump = Globals.Input.IsTriggered(Input.Button.JUMP);
+            var jumpHeld = Globals.Input.IsPressed(Input.Button.JUMP);
             if (jump) jumpRequest = JUMP_BUFFER_TIME;
             var prevState = GetCurrentAnimState();
             // Advance/reset coyote time
             if (IsGrounded) coyoteTime = COYOTE_TIME;
             else if (coyoteTime > 0) coyoteTime -= d;
-            // Apply gravity
-            if (!IsGrounded && Math.Abs(Speed.Y) < APEX_RANGE)
-            {
-                Speed.Y += d * GRAVITY * APEX_MULTIPLIER;
-            }
-            else Speed.Y += d * GRAVITY;
-
+            
             // Apply movement
             if (coyoteTime>0 && jumpRequest>0)
             {
                 Speed.Y = -JUMP_FORCE;
                 coyoteTime = 0;
                 jumpRequest = 0;
+                IsJumping = true;
             }
             if (horz != 0)
             {
@@ -88,37 +81,24 @@ namespace HyperDigger
             }
             if (!IsGrounded)
             {
-                if (Speed.Y < 0) moveState = Animations.EAnimType.JUMP;
-                else moveState = Animations.EAnimType.FALL;
+                if (Speed.Y < 0)
+                {
+                    moveState = Animations.EAnimType.JUMP;
+                    if (IsJumping && !jumpHeld)
+                    {
+                        IsJumping = false;
+                        Speed.Y = 0;
+                    }
+                }
+                else
+                {
+                    moveState = Animations.EAnimType.FALL;
+                    IsJumping = false;
+                }
             }
-            Speed.Y = Math.Clamp(Speed.Y, -MAX_YSPEED, MAX_YSPEED);
-
-            // Check collisions
-            IsGrounded = false;
-            if (IsColliding((int)Position.X, (int)Position.Y))
-            {
-                Position.Y -= 1;
-            }
-            Vector2 NextPosition = Position + Speed;
-            
-            while (IsColliding((int)Position.X, (int)NextPosition.Y))
-            {
-                if (Speed.Y > 0) IsGrounded = true;
-                Speed.Y = 0;
-                
-                NextPosition.Y = HyperMath.MoveTowards(NextPosition.Y, Position.Y, 1);
-                if (NextPosition.Y == Position.Y) break;
-            }
-            while (IsColliding((int)NextPosition.X, (int)NextPosition.Y))
-            {
-                Speed.X = 0;
-
-                NextPosition.X = HyperMath.MoveTowards(NextPosition.X, Position.X, 1);
-                if (NextPosition.X == Position.X) break;
-            }
-            // Apply
-            Position.X = NextPosition.X;
-            Position.Y = NextPosition.Y;
+            UpdateGravity();
+            //
+            base.Update(gameTime);
             //
             if (prevState != GetCurrentAnimState())
             {
@@ -129,6 +109,16 @@ namespace HyperDigger
             AdvanceAnimation(horz, d);
             //
             jumpRequest -= d;
+        }
+
+        public void UpdateGravity()
+        {
+            // Apply gravity
+            if (!IsGrounded && Math.Abs(Speed.Y) < APEX_RANGE)
+            {
+                GravityScale = APEX_MULTIPLIER;
+            }
+            else GravityScale = 1f;
         }
 
         private Animations.EAnimType GetCurrentAnimState()
@@ -168,31 +158,21 @@ namespace HyperDigger
             }
         }
 
-        public bool IsColliding(int tx, int ty)
+        public override void Draw()
         {
-            if (World == null) return false;
-
-            return World.CheckCollisionWithWorld(this, tx, ty, BoundarySize);
-        }
-
-        public bool CollidesWith(int x, int y, Vector2 boundarySize)
-        {
-            float otherSizeX = boundarySize.X * ICollision.BOUND_UNIT;
-            float otherSizeY = boundarySize.Y * ICollision.BOUND_UNIT / 2;
-            float xOther = x;
-            float yOther = y - otherSizeY;
-            float thisSizeX = BoundarySize.X * ICollision.BOUND_UNIT;
-            float thisSizeY = BoundarySize.Y * ICollision.BOUND_UNIT / 2;
-            float xThis = Position.X;
-            float yThis = Position.Y - thisSizeY;
-            float deltaX = xOther - xThis;
-            float deltaY = yOther - yThis;
-            return (deltaX < otherSizeX+thisSizeX) || (deltaY < otherSizeY + thisSizeY);
-        }
-
-        public void DoUpdate(GameTime gameTime)
-        {
-            Update(gameTime);
+            base.Draw();
+            // Draw collider
+            if (Collider != null)
+            {
+                var sx = Collider.OffsetX(GlobalPosition.X) - Collider.BoundarySize.X;
+                var sy = Collider.OffsetY(GlobalPosition.Y) - Collider.BoundarySize.Y;
+                var w = Collider.BoundarySize.X * 2;
+                var h = Collider.BoundarySize.Y * 2;
+                var rect = new Rectangle((int)sx, (int)sy, (int)w, (int)h);
+                Globals.Graphics.DrawRectangle(rect, new Color(64, 160, 224, 64));
+            }
+            // Draw origin
+            Globals.Graphics.DrawDot(GlobalPosition, Color.IndianRed);
         }
     }
 }

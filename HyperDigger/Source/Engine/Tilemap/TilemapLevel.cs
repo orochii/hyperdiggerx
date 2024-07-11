@@ -76,15 +76,15 @@ namespace HyperDigger
             return (x >= cx && y > cy) && (x < cw && y < ch);
         }
 
-        internal bool CheckCollisionWithEntities(GameObject requester, int cx, int cy, Vector2 boundarySize)
+        internal bool CheckCollisionWithEntities(int cx, int cy, Collider other)
         {
             foreach (var entity in Entities)
             {
-                if (entity == requester) continue;
-                if (entity is ICollision)
+                if (entity == other.Parent) continue;
+                if (entity is PhysicsBody)
                 {
-                    var collider = entity as ICollision;
-                    if (collider.CollidesWith(cx, cy, boundarySize)) return true;
+                    var collider = entity as PhysicsBody;
+                    if (collider.CollidesWith(cx, cy, other)) return true;
                 }
             }
             return false;

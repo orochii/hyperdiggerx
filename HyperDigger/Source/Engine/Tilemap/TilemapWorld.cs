@@ -79,33 +79,54 @@ namespace HyperDigger
             return foundIdx;
         }
 
-        public bool CheckCollisionWithWorld(GameObject requester, int cx, int cy, Vector2 boundarySize)
+        public bool CheckCollisionWithWorld(int cx, int cy, Collider other)
         {
+            // Check entities first.
             foreach (var l in ActiveLevels)
             {
-                if (l.CheckCollisionWithEntities(requester, cx, cy, boundarySize)) return true;
+                if (l.CheckCollisionWithEntities(cx, cy, other)) return true;
             }
 
-            for (int x = 0; x <= boundarySize.X; x++)
-            {
-                int xx = x * ICollision.BOUND_UNIT;
-                int xl = cx + xx;
-                int xr = cx - xx;
-                for (int y = 0; y <= boundarySize.Y; y++)
-                {
-                    int yy = y * ICollision.BOUND_UNIT;
-                    int yc = cy - yy;
+            // Check against levels.
+            int offsetCx = (int)other.OffsetX(cx);
+            int offsetCy = (int)other.OffsetY(cy);
+            
+            int xUnits = (int)other.BoundarySize.X / Collider.BOUND_UNIT;
+            int yUnits = (int)other.BoundarySize.Y / Collider.BOUND_UNIT;
 
-                    var ll = GetActiveLevelInBoundaries(xl, yc);
-                    if (ll != null)
+            for (int x = 0; x <= xUnits; x++)
+            {
+                int xx = x * Collider.BOUND_UNIT;
+                int xl = offsetCx + xx;
+                int xr = offsetCx - xx;
+                for (int y = 0; y <= yUnits; y++)
+                {
+                    int yy = y * Collider.BOUND_UNIT;
+                    int yt = offsetCy - yy;
+                    int yb = offsetCy + yy;
+
+                    var tl = GetActiveLevelInBoundaries(xl, yt);
+                    if (tl != null)
                     {
-                        if (ll.CheckCollisionWithTileAtPosition(xl, yc))
+                        if (tl.CheckCollisionWithTileAtPosition(xl, yt))
                             return true;
                     }
-                    var lr = GetActiveLevelInBoundaries(xr, yc);
-                    if (lr != null)
+                    var tr = GetActiveLevelInBoundaries(xr, yt);
+                    if (tr != null)
                     {
-                        if (lr.CheckCollisionWithTileAtPosition(xr, yc))
+                        if (tr.CheckCollisionWithTileAtPosition(xr, yt))
+                            return true;
+                    }
+                    var bl = GetActiveLevelInBoundaries(xl, yb);
+                    if (bl != null)
+                    {
+                        if (bl.CheckCollisionWithTileAtPosition(xl, yb))
+                            return true;
+                    }
+                    var br = GetActiveLevelInBoundaries(xr, yb);
+                    if (br != null)
+                    {
+                        if (br.CheckCollisionWithTileAtPosition(xr, yb))
                             return true;
                     }
                 }
