@@ -224,7 +224,7 @@ public class TilemapRenderer : IDisposable
         string file = Path.ChangeExtension(path, null);
         string directory = Path.GetDirectoryName(level.WorldFilePath)!;
         string assetName = Path.Join(directory, file);
-        tilemap = Globals.Cache.LoadTexture(assetName);
+        tilemap = Global.Cache.LoadTexture(assetName);
 
         TilemapCache.Add(path, tilemap);
 

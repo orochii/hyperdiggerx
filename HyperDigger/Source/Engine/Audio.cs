@@ -43,7 +43,7 @@ namespace HyperDigger
 
         public Channel PlaySFX(string sfxName, float volume, float pitch)
         {
-            var sound = Globals.Cache.LoadSound("Audio/SFX/" + sfxName);
+            var sound = Global.Cache.LoadSound("Audio/SFX/" + sfxName);
             var channel = sound.Play(SFXGroup);
             channel.Volume = volume;
             channel.Pitch = pitch;
@@ -54,7 +54,7 @@ namespace HyperDigger
         {
             var channel = PlaySFX(sfxName, volume, pitch);
             channel.Is3D = true;
-            var halfScreen = new Vector2(Globals.Graphics.Width / 2, Globals.Graphics.Height / 2);
+            var halfScreen = new Vector2(Global.Graphics.Width / 2, Global.Graphics.Height / 2);
             var scaledPos = (pos - halfScreen) * 0.01f;
             channel.Position3D = new Vector3(scaledPos.X, scaledPos.Y, 0);
             return channel;
@@ -75,7 +75,7 @@ namespace HyperDigger
             // Play if name is not empty
             if (bgmName.Length > 0)
             {
-                var sound = Globals.Cache.LoadSound("Audio/BGM/" + currentBGMName);
+                var sound = Global.Cache.LoadSound("Audio/BGM/" + currentBGMName);
                 PlayingBGM = sound.Play(BGMGroup);
                 PlayingBGM.Looping = true;
                 isPlaying = true;

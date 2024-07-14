@@ -34,7 +34,7 @@ namespace HyperDigger
             get { 
                 if (_container != null) return _container.GlobalPosition + Position;
                 return Position;
-            } 
+            }
         }
 
         public override string ToString()

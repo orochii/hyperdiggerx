@@ -20,10 +20,10 @@ namespace HyperDigger
          * Bumped Head on Corner
          */
 
-        const float WALK_SPEED = 2f;
-        const float WALK_ACCEL = 20f;
-        const float DEACCEL = 15f;
-        const float JUMP_FORCE = 6f;
+        const float WALK_SPEED = 128f;
+        const float WALK_ACCEL = 800f;
+        const float DEACCEL = 720f;
+        const float JUMP_FORCE = 320f;
         const float COYOTE_TIME = 0.1f;
         const float APEX_RANGE = 1.0f;
         const float APEX_MULTIPLIER = 0.6f;
@@ -39,12 +39,12 @@ namespace HyperDigger
         float animFrame = 0;
 
         public Player(Container container) : base(container) {
-            Texture = Globals.Cache.LoadTexture("Graphics/Character/ari");
-            animEntry = Globals.Database.Animations.Get("ari");
+            Texture = Global.Cache.LoadTexture("Graphics/Character/ari");
+            animEntry = Global.Database.Animations.Get("ari");
             Depth = 1;
             Name = "Ari";
             SourceRect = new Rectangle(0, 0, animEntry.frameWidth, animEntry.frameHeight);
-            Origin = new Vector2(animEntry.frameWidth / 2, animEntry.frameHeight - 1);
+            Origin = new Vector2(animEntry.frameWidth / 2, animEntry.frameHeight + 1);
             Collider.BoundarySize = new Vector2(4,14);
             Collider.Offset = new Vector2(0,-14);
         }
@@ -52,12 +52,14 @@ namespace HyperDigger
         public override void Update(GameTime gameTime)
         {
             float d = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            
             // Read input
-            var horz = Globals.Input.GetHorz();
-            var jump = Globals.Input.IsTriggered(Input.Button.JUMP);
-            var jumpHeld = Globals.Input.IsPressed(Input.Button.JUMP);
+            var horz = Global.Input.GetHorz();
+            var jump = Global.Input.IsTriggered(Input.Button.JUMP);
+            var jumpHeld = Global.Input.IsPressed(Input.Button.JUMP);
             if (jump) jumpRequest = JUMP_BUFFER_TIME;
             var prevState = GetCurrentAnimState();
+            
             // Advance/reset coyote time
             if (IsGrounded) coyoteTime = COYOTE_TIME;
             else if (coyoteTime > 0) coyoteTime -= d;
@@ -152,27 +154,11 @@ namespace HyperDigger
                 _lastFrame = floorAnimFrame;
                 if (state.events.TryGetValue(_lastFrame, out var ev))
                 {
-                    Globals.Audio.PlaySFXAt(ev.name, ev.volume, ev.pitch, GlobalPosition);
+                    Global.Audio.PlaySFXAt(ev.name, ev.volume, ev.pitch, GlobalPosition);
                     System.Console.WriteLine("Play sound {0}", ev.name);
                 }
             }
         }
 
-        public override void Draw()
-        {
-            base.Draw();
-            // Draw collider
-            if (Collider != null)
-            {
-                var sx = Collider.OffsetX(GlobalPosition.X) - Collider.BoundarySize.X;
-                var sy = Collider.OffsetY(GlobalPosition.Y) - Collider.BoundarySize.Y;
-                var w = Collider.BoundarySize.X * 2;
-                var h = Collider.BoundarySize.Y * 2;
-                var rect = new Rectangle((int)sx, (int)sy, (int)w, (int)h);
-                Globals.Graphics.DrawRectangle(rect, new Color(64, 160, 224, 64));
-            }
-            // Draw origin
-            Globals.Graphics.DrawDot(GlobalPosition, Color.IndianRed);
-        }
     }
 }

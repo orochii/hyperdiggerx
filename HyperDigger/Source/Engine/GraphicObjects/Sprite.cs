@@ -29,11 +29,11 @@ namespace HyperDigger
 
             if (SourceRect.Width == 0 || SourceRect.Height == 0)
             {
-                Globals.Graphics.SpriteBatch.Draw(Texture, intPosition, null, Color, Angle, Origin, Scale, Effects, 0);
+                Global.Graphics.SpriteBatch.Draw(Texture, intPosition, null, Color, Angle, Origin, Scale, Effects, 0);
             }
             else
             {
-                Globals.Graphics.SpriteBatch.Draw(Texture, intPosition, SourceRect, Color, Angle, Origin, Scale, Effects, 0);
+                Global.Graphics.SpriteBatch.Draw(Texture, intPosition, SourceRect, Color, Angle, Origin, Scale, Effects, 0);
             }
         }
 

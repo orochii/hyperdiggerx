@@ -14,6 +14,9 @@ namespace HyperDigger
         TilemapRenderer Renderer;
         Sprite[] Layers = new Sprite[0];
         List<GameObject> Entities = new List<GameObject>();
+        List<EntityInstance> EntityInstances = new List<EntityInstance>();
+
+        bool IsActive;
 
         public string Identifier { get { return Level.Identifier; } }
 
@@ -52,6 +55,11 @@ namespace HyperDigger
                     }
                 }
                 Layers[i] = sprite;
+                // Register entities
+                if (layer._Type == LayerType.Entities)
+                {
+                    EntityInstances.AddRange(layer.EntityInstances);
+                }
             }
         }
 
@@ -64,6 +72,29 @@ namespace HyperDigger
                 Layers[i].Texture = l.Layers[i];
                 Layers[i].Container = v;
             }
+            bool newState = (v != null);
+            // Set or destroy entities
+            if (newState == IsActive) return;
+            if (newState) // Create
+            {
+                foreach (var e in EntityInstances)
+                {
+                    if (e._Identifier == "EntitySpawn")
+                    {
+                        var spawn = EntityFactory.CreateEntity(v, World, e);
+                        if (spawn != null) Entities.Add(spawn);
+                    }
+                }
+            }
+            else // Destroy
+            {
+                foreach (var e in Entities)
+                {
+                    e.Container = null;
+                }
+                Entities.Clear();
+            }
+            IsActive = newState;
         }
 
         public bool CheckIfInBoundaries(int x, int y)
@@ -106,21 +137,72 @@ namespace HyperDigger
                         case 1: // GROUND
                         case 3: // WALL
                             return true;
+                        case 5: // SLOPE
+                            var d = GetTileId(layer, localX, localY + 16);
+                            if (d == 1) // Ground
+                            {
+                                var l = GetTileId(layer, localX - 16, localY);
+                                var r = GetTileId(layer, localX + 16, localY);
+
+                                if (l == 1 && r == 5) // 22.5deg Up-Down LeftSide
+                                {
+                                    return CheckSlope225(localX, localY, 0);
+                                }
+                                if (l == 5 && r == 1) // 22.5deg Down-Up RightSide
+                                {
+                                    return CheckSlope225(localX, localY, 0, true);
+                                }
+                                if (l == 5 && r <= 0) // 22.5deg Up-Down RightSide
+                                {
+                                    return CheckSlope225(localX, localY, 8);
+                                }
+                                if (l <= 0 && r == 5) // 22.5deg Down-Up LeftSide
+                                {
+                                    return CheckSlope225(localX, localY, 8, true);
+                                }
+                                if (l == 1 && r != 1) // 45deg Up-Down
+                                {
+                                    return CheckSlope45(localX, localY);
+                                }
+                                if (l != 1 && r == 1) // 45deg Dn-Up
+                                {
+                                    return CheckSlope45(localX, localY, true);
+                                }
+                            }
+                            
+                            return false;
                     }
                 }
             }
             return false;
         }
 
+        private bool CheckSlope45(int localX, int localY, bool invertX=false)
+        {
+            int x = localX % 16;
+            int y = localY % 16;
+            if (invertX) x = 16 - x;
+            return y > x;
+        }
+        private bool CheckSlope225(int localX, int localY, int offY, bool invertX = false)
+        {
+            int x = localX % 16;
+            int y = localY % 16;
+            if (invertX) x = 16 - x;
+            return (y - offY) > x / 2;
+        }
+
         private int GetTileId(LayerInstance layer, int localX, int localY)
         {
+            // Return 0 if off bounds
+            if (localX < 0 || localY < 0) return -1;
+            if (localX >= Level.PxWid || localY >= Level.PxHei) return -1;
+            // Transform to tile coordinates
             int tileX = localX / layer._GridSize;
             int tileY = localY / layer._GridSize;
             int mapWidth = Level.PxWid / layer._GridSize;
             int tileIdx = tileY * mapWidth + tileX;
-
-            //System.Console.WriteLine(string.Format("tileX:{0} tileY:{1} mapWidth:{2} tileIdx:{3}", tileX, tileY, mapWidth, tileIdx));
-
+            // If off bounds of the array.
             if (tileIdx < 0 || tileIdx >= layer.IntGridCsv.Length)
             {
                 return -1;
@@ -140,9 +222,9 @@ namespace HyperDigger
                 entity.Update(gameTime);
             }
 #if DEBUG
-            if (Globals.Input.IsTriggered(Input.Button.ESCAPE))
+            if (Global.Input.IsTriggered(Input.Button.ESCAPE))
             {
-                var n = Globals.Input.GetDir8();
+                var n = Global.Input.GetDir8();
                 if (n == 0) n = 5;
                 n -= 1;
                 if (n < Layers.Length)

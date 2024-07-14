@@ -56,6 +56,18 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/Character/hikari_battler.png
 
+#begin Graphics/Character/troll.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Graphics/Character/troll.png
+
 #begin Graphics/System/HUD.png
 /importer:TextureImporter
 /processor:TextureProcessor

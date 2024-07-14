@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 
 namespace HyperDigger
 {
@@ -33,9 +34,9 @@ namespace HyperDigger
             float thisSizeY = BoundarySize.Y;
             float xThis = OffsetX(Parent.Position.X);
             float yThis = OffsetY(Parent.Position.Y);
-            float deltaX = xOther - xThis;
-            float deltaY = yOther - yThis;
-            return (deltaX < otherSizeX + thisSizeX) || (deltaY < otherSizeY + thisSizeY);
+            float deltaX = Math.Abs(xOther - xThis);
+            float deltaY = Math.Abs(yOther - yThis);
+            return (deltaX < otherSizeX + thisSizeX) && (deltaY < otherSizeY + thisSizeY);
         }
 
         public float OffsetX(float x)

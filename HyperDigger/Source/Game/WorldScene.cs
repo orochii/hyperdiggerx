@@ -22,10 +22,10 @@ namespace HyperDigger
             // Create UI
             UI = new Container(Container);
             Sprite uiBack = new Sprite(UI);
-            uiBack.Texture = Globals.Cache.LoadTexture("Graphics/System/HUD");
+            uiBack.Texture = Global.Cache.LoadTexture("Graphics/System/HUD");
 
             // Play musics
-            Globals.Audio.PlayBGM("That Zen Moment.mp3");
+            Global.Audio.PlayBGM("That Zen Moment.mp3");
         }
 
         public override void Update(GameTime gameTime)

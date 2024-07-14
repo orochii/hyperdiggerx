@@ -33,14 +33,14 @@ namespace HyperDigger
             _innerContainer = new Container(container);
             Container = container;
             // Load file
-            File = LDtkFile.FromFile(filename, Globals.Cache.content);
+            File = LDtkFile.FromFile(filename, Global.Cache.content);
 
             // Load world
             if (worldIdx >= File.Worlds.Length) worldIdx = 0;
             World = File.LoadWorld(File.Worlds[worldIdx].Iid);
 
             // Create renderer
-            Renderer = new TilemapRenderer(Globals.Graphics.SpriteBatch);
+            Renderer = new TilemapRenderer(Global.Graphics.SpriteBatch);
 
             // Load levels here.
             Levels = new TilemapLevel[World.Levels.Length];
@@ -179,7 +179,12 @@ namespace HyperDigger
 
         public void SetActiveLevels(List<TilemapLevel> newActiveLevels)
         {
-            foreach (var l in ActiveLevels)
+            var _toDisable= new List<TilemapLevel>();
+
+            _toDisable.AddRange(ActiveLevels);
+            foreach (var level in newActiveLevels) _toDisable.Remove(level);
+
+            foreach (var l in _toDisable)
             {
                 l.Set(null);
             }
@@ -200,8 +205,8 @@ namespace HyperDigger
             // Update view
             SetActiveLevelByBoundaries((int)ViewTarget.Position.X, (int)ViewTarget.Position.Y);
             // Follow player
-            InnerContainer.Position.X = (Globals.Graphics.Width / 2) - ViewTarget.Position.X;
-            InnerContainer.Position.Y = (Globals.Graphics.Height / 2) - ViewTarget.Position.Y;
+            InnerContainer.Position.X = (Global.Graphics.Width / 2) - ViewTarget.Position.X;
+            InnerContainer.Position.Y = (Global.Graphics.Height / 2) - ViewTarget.Position.Y;
             ClampViewToBoundaries();
         }
 
@@ -212,8 +217,8 @@ namespace HyperDigger
 
             var minX = boundaries.Left;
             var minY = boundaries.Top;
-            var maxX = boundaries.Right - Globals.Graphics.Width;
-            var maxY = boundaries.Bottom - Globals.Graphics.Height;
+            var maxX = boundaries.Right - Global.Graphics.Width;
+            var maxY = boundaries.Bottom - Global.Graphics.Height;
             maxX = Math.Max(minX, maxX);
             maxY = Math.Max(minY, maxY);
             InnerContainer.Position.X = Math.Clamp(InnerContainer.Position.X, -maxX, -minX);

@@ -173,7 +173,7 @@ namespace HyperDigger
         {
             if (IsTriggered(Input.Button.SYS_SCALE))
             {
-                Globals.Graphics.Scale = (((Globals.Graphics.Scale - 1) + 1) % 3) + 1;
+                Global.Graphics.Scale = (((Global.Graphics.Scale - 1) + 1) % 3) + 1;
             }
         }
         

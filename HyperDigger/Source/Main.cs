@@ -6,33 +6,33 @@ namespace HyperDigger
     {
         public Main()
         {
-            Globals.Initialize(this);
+            Global.Initialize(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
 
         protected override void Initialize()
         {
-            Globals.Graphics.Initialize();
-            Globals.Audio.Initialize();
+            Global.Graphics.Initialize();
+            Global.Audio.Initialize();
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            Globals.Cache.content = Content;
+            Global.Cache.content = Content;
             WorldScene startScene = new WorldScene();
-            Globals.SceneStack.AddScene(startScene);
+            Global.SceneStack.AddScene(startScene);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            Globals.Input.Update(gameTime);
-            if (Globals.SceneStack.IsFree())
+            Global.Input.Update(gameTime);
+            if (Global.SceneStack.IsFree())
                 Exit();
             else
             {
-                Globals.SceneStack.Update(gameTime);
+                Global.SceneStack.Update(gameTime);
             }
 
             base.Update(gameTime);
@@ -40,15 +40,15 @@ namespace HyperDigger
 
         protected override void Draw(GameTime gameTime)
         {
-            Globals.Graphics.StartRender();
-            Globals.SceneStack.Draw();
-            Globals.Graphics.EndRender();
+            Global.Graphics.StartRender();
+            Global.SceneStack.Draw();
+            Global.Graphics.EndRender();
 
             base.Draw(gameTime);
         }
         protected override void UnloadContent()
         {
-            Globals.Cache.FlushAll();
+            Global.Cache.FlushAll();
             base.UnloadContent();
         }
     }

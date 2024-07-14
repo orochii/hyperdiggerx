@@ -20,5 +20,23 @@ namespace HyperDigger
             return Collider.CollidesWith(x, y, other);
         }
 
+        public override void Draw()
+        {
+            base.Draw();
+            // Draw debug colliders.
+            if (!Global.DebugDraw) return;
+            // Draw collider
+            if (Collider != null)
+            {
+                var sx = Collider.OffsetX(GlobalPosition.X) - Collider.BoundarySize.X;
+                var sy = Collider.OffsetY(GlobalPosition.Y) - Collider.BoundarySize.Y;
+                var w = Collider.BoundarySize.X * 2;
+                var h = Collider.BoundarySize.Y * 2;
+                var rect = new Rectangle((int)sx, (int)sy, (int)w, (int)h);
+                Global.Graphics.DrawRectangle(rect, new Color(64, 160, 224, 64));
+            }
+            // Draw origin
+            Global.Graphics.DrawDot(GlobalPosition, Color.IndianRed);
+        }
     }
 }
