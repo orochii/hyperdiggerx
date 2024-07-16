@@ -34,7 +34,8 @@ namespace HyperDigger
             bool _willBeGrounded = false;
             if (IsColliding((int)Position.X, (int)Position.Y))
             {
-                Position.Y -= 1;
+                Position.Y = (int)Position.Y;
+                if (IsColliding((int)Position.X, (int)Position.Y)) Position.Y -= 1;
                 _willBeGrounded = true;
             }
             Vector2 NextPosition = Position + (Speed * d);

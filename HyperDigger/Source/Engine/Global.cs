@@ -4,7 +4,7 @@ namespace HyperDigger
 {
     class Global
     {
-        public static bool DebugDraw = false;
+        public static bool DebugDraw = true;
 
         public static Graphics Graphics;
         public static Audio Audio;
@@ -12,6 +12,7 @@ namespace HyperDigger
         public static Input Input;
         public static SceneStack SceneStack;
         public static Database Database;
+        public static GameState State;
 
         internal static void Initialize(Game g)
         {
@@ -21,6 +22,7 @@ namespace HyperDigger
             Cache = new Cache();
             Input = new Input();
             SceneStack = new SceneStack();
+            State = new GameState();
         }
     }
 }

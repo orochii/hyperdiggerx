@@ -19,6 +19,9 @@ namespace HyperDigger
         private int _scale = 2;
         private Rectangle _actualScreenRectangle;
         public SpriteBatch SpriteBatch { get {  return _spriteBatch; } }
+
+        public BlendState BlendMode = BlendState.AlphaBlend;
+
         private SpriteBatch _spriteBatch;
         Texture2D _dotTexture;
 
@@ -37,14 +40,27 @@ namespace HyperDigger
             _dotTexture.SetData(new Color[] { Color.White });
         }
 
+        public SpriteBatch CreateSpriteBatch() { 
+            return new SpriteBatch(_game.GraphicsDevice);
+        }
+        public Texture2D GetScreenshot()
+        {
+            var _screenshot = new Texture2D(_game.GraphicsDevice, _nativeRenderTarget.Width, _nativeRenderTarget.Height);
+            var _data = new Color[_nativeRenderTarget.Width * _nativeRenderTarget.Height];
+            _nativeRenderTarget.GetData(_data);
+            _screenshot.SetData(_data);
+            return _screenshot;
+        }
+
         internal void StartRender()
         {
             _game.GraphicsDevice.SetRenderTarget(_nativeRenderTarget);
             _game.GraphicsDevice.Clear(_backgroundColor);
-            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendMode);
         }
         internal void EndRender()
         {
+            _game.GraphicsDevice.SetRenderTarget(_nativeRenderTarget);
             _spriteBatch.End();
             // Redraw all but scaled
             _game.GraphicsDevice.SetRenderTarget(null);
@@ -63,14 +79,14 @@ namespace HyperDigger
             _graphics.ApplyChanges();
         }
 
-        public void DrawDot(Vector2 position, Color color)
+        public void DrawDot(SpriteBatch batch, Vector2 position, Color color)
         {
-            SpriteBatch.Draw(_dotTexture, position, color);
+            batch.Draw(_dotTexture, position, color);
         }
 
-        public void DrawRectangle(Rectangle rect, Color color)
+        public void DrawRectangle(SpriteBatch batch, Rectangle rect, Color color)
         {
-            SpriteBatch.Draw(_dotTexture, rect, color);
+            batch.Draw(_dotTexture, rect, color);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace HyperDigger
     {
         Player Player;
         TilemapWorld World;
-        Container UI;
+        WorldHUD UI;
 
         public override void Initialize()
         {
@@ -20,19 +20,29 @@ namespace HyperDigger
             World.AddEntity(Player);
             World.ViewTarget = Player;
             // Create UI
-            UI = new Container(Container);
-            Sprite uiBack = new Sprite(UI);
-            uiBack.Texture = Global.Cache.LoadTexture("Graphics/System/HUD");
-
+            UI = new WorldHUD(Container);
+            UI.SetLevel(World.CurrentLevel);
+            UI.Player = Player;
+            World.OnCurrentLevelChange += OnCurrentLevelChange;
             // Play musics
             Global.Audio.PlayBGM("That Zen Moment.mp3");
+        }
+
+        private void OnCurrentLevelChange(TilemapLevel l)
+        {
+            UI.SetLevel(l);
         }
 
         public override void Update(GameTime gameTime)
         {
             //Player.Update(gameTime);
             World.Update(gameTime);
-            
+            UI.Update(gameTime);
+
+            if (Global.Input.IsTriggered(Input.Button.MENU))
+            {
+                Global.SceneStack.AddScene(new WorldmapScene(Player, World));
+            }
         }
 
         public override void Dispose()

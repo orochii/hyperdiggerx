@@ -3,22 +3,30 @@ using LDtk.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using static Assimp.Metadata;
 
 namespace HyperDigger
 {
-    internal class TilemapWorld
+    public class TilemapWorld
     {
+        public delegate void OnLevelChange(TilemapLevel l);
+
+        public TilemapLevel CurrentLevel { get; private set; }
+        public GameObject ViewTarget;
+        public event OnLevelChange OnCurrentLevelChange;
+
         LDtkFile File;
         LDtkWorld World;
         TilemapRenderer Renderer;
         Container _container;
         Container _innerContainer;
         TilemapLevel[] Levels;
-        public TilemapLevel CurrentLevel {  get; private set; }
         List<TilemapLevel> ActiveLevels = new List<TilemapLevel>();
         List<GameObject> GlobalEntities = new List<GameObject>();
-        public GameObject ViewTarget;
+        List<GameObject> _toAdd = new List<GameObject>();
+        List<GameObject> _toDestroy = new List<GameObject>();
 
+        public TilemapLevel[] AllLevels { get { return Levels; } }
         public Container Container { 
             get { return _container; } 
             set { 
@@ -79,14 +87,53 @@ namespace HyperDigger
             return foundIdx;
         }
 
+        public List<GameObject> CheckCollisionWithAllEntities(int cx, int cy, Collider other)
+        {
+            var ary = new List<GameObject>();
+
+            foreach (var entity in GlobalEntities)
+            {
+                if (entity == other.Parent) continue;
+                if (entity is PhysicsBody)
+                {
+                    var collider = entity as PhysicsBody;
+                    if (collider.CollidesWith(cx, cy, other)) ary.Add(entity);
+                }
+            }
+            foreach (var l in ActiveLevels)
+            {
+                var levelAry = l.CheckCollisionWithAllEntities(cx, cy, other);
+                if(levelAry.Count > 0) ary.AddRange(levelAry);
+            }
+            return ary;
+        }
+
+        public GameObject CheckCollisionWithEntities(int cx, int cy, Collider other)
+        {
+            foreach (var entity in GlobalEntities)
+            {
+                if (entity == other.Parent) continue;
+                if (entity is PhysicsBody)
+                {
+                    var collider = entity as PhysicsBody;
+                    if (collider.CollidesWith(cx, cy, other)) return entity;
+                }
+            }
+
+            foreach (var l in ActiveLevels)
+            {
+                var entity = l.CheckCollisionWithEntities(cx, cy, other);
+                if (entity != null) return entity;
+            }
+
+            return null;
+        }
+
         public bool CheckCollisionWithWorld(int cx, int cy, Collider other)
         {
             // Check entities first.
-            foreach (var l in ActiveLevels)
-            {
-                if (l.CheckCollisionWithEntities(cx, cy, other)) return true;
-            }
-
+            if (CheckCollisionWithEntities(cx, cy, other) != null) return true;
+            
             // Check against levels.
             int offsetCx = (int)other.OffsetX(cx);
             int offsetCy = (int)other.OffsetY(cy);
@@ -165,6 +212,7 @@ namespace HyperDigger
             if (foundIdx < 0) return;
             // Set current level.
             CurrentLevel = Levels[foundIdx];
+            if(OnCurrentLevelChange != null) OnCurrentLevelChange(CurrentLevel);
             // Set new list of active levels.
             List<TilemapLevel> newActiveLevels = new List<TilemapLevel>();
             newActiveLevels.Add(Levels[foundIdx]);
@@ -197,10 +245,34 @@ namespace HyperDigger
 
         internal void Update(GameTime gameTime)
         {
-            foreach(var e in GlobalEntities)
+            if (_toAdd.Count > 0)
             {
-                e.Update(gameTime);
+                foreach (var a in _toAdd) GlobalEntities.Add(a);
+                _toAdd.Clear();
             }
+
+            foreach (var entity in GlobalEntities)
+            {
+                if (entity.Destroyed)
+                {
+                    _toDestroy.Add(entity);
+                }
+                else
+                {
+                    entity.Update(gameTime);
+                }
+            }
+
+            if (_toDestroy.Count > 0)
+            {
+                foreach (var d in _toDestroy)
+                {
+                    GlobalEntities.Remove(d);
+                    d.Container = null;
+                }
+                _toDestroy.Clear();
+            }
+
             CurrentLevel.Update(gameTime);
             // Update view
             SetActiveLevelByBoundaries((int)ViewTarget.Position.X, (int)ViewTarget.Position.Y);
@@ -235,7 +307,7 @@ namespace HyperDigger
 
         public void AddEntity(GameObject entity)
         {
-            GlobalEntities.Add(entity);
+            _toAdd.Add(entity);
             entity.World = this;
         }
     }

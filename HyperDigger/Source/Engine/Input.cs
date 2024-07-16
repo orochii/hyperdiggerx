@@ -10,7 +10,8 @@ namespace HyperDigger
         const float AXIS_THRESHOLD = 0.5f;
         public enum Button { UP, DOWN, LEFT, RIGHT, 
             OK, CANCEL, MENU, ESCAPE, 
-            JUMP, ATTACK, SKILL, DASH,
+            JUMP, ATTACK, DRAW, DASH,
+            SKILL_L, SKILL_U, SKILL_D, SKILL_R,
             SYS_SCALE
         }
         public enum MappingType
@@ -59,10 +60,38 @@ namespace HyperDigger
             // Gameplay
             AddMapping(Button.JUMP, MappingType.KEYBOARD, (int)Keys.Space);
             AddMapping(Button.ATTACK, MappingType.KEYBOARD, (int)Keys.Z);
-            AddMapping(Button.SKILL, MappingType.KEYBOARD, (int)Keys.X);
+            AddMapping(Button.DRAW, MappingType.KEYBOARD, (int)Keys.X);
             AddMapping(Button.DASH, MappingType.KEYBOARD, (int)Keys.LeftShift);
+            AddMapping(Button.SKILL_L, MappingType.KEYBOARD, (int)Keys.A);
+            AddMapping(Button.SKILL_U, MappingType.KEYBOARD, (int)Keys.W);
+            AddMapping(Button.SKILL_D, MappingType.KEYBOARD, (int)Keys.S);
+            AddMapping(Button.SKILL_R, MappingType.KEYBOARD, (int)Keys.D);
             // System
             AddMapping(Button.SYS_SCALE, MappingType.KEYBOARD, (int)Keys.F5);
+
+            /// GAMEPAD
+            // Movement
+            AddMapping(Button.LEFT, MappingType.BUTTON, (int)Buttons.LeftThumbstickLeft);
+            AddMapping(Button.RIGHT, MappingType.BUTTON, (int)Buttons.LeftThumbstickRight);
+            AddMapping(Button.UP, MappingType.BUTTON, (int)Buttons.LeftThumbstickUp);
+            AddMapping(Button.DOWN, MappingType.BUTTON, (int)Buttons.LeftThumbstickDown);
+            AddMapping(Button.LEFT, MappingType.BUTTON, (int)Buttons.DPadLeft);
+            AddMapping(Button.RIGHT, MappingType.BUTTON, (int)Buttons.DPadRight);
+            AddMapping(Button.UP, MappingType.BUTTON, (int)Buttons.DPadUp);
+            AddMapping(Button.DOWN, MappingType.BUTTON, (int)Buttons.DPadDown);
+            // Menus
+            AddMapping(Button.OK, MappingType.BUTTON, (int)Buttons.A);
+            AddMapping(Button.CANCEL, MappingType.BUTTON, (int)Buttons.B);
+            AddMapping(Button.MENU, MappingType.BUTTON, (int)Buttons.Start);
+            // Gameplay
+            AddMapping(Button.JUMP, MappingType.BUTTON, (int)Buttons.LeftTrigger);
+            AddMapping(Button.ATTACK, MappingType.BUTTON, (int)Buttons.LeftShoulder);
+            AddMapping(Button.DRAW, MappingType.BUTTON, (int)Buttons.RightShoulder);
+            AddMapping(Button.DASH, MappingType.BUTTON, (int)Buttons.RightTrigger);
+            AddMapping(Button.SKILL_L, MappingType.BUTTON, (int)Buttons.X);
+            AddMapping(Button.SKILL_U, MappingType.BUTTON, (int)Buttons.Y);
+            AddMapping(Button.SKILL_D, MappingType.BUTTON, (int)Buttons.A);
+            AddMapping(Button.SKILL_R, MappingType.BUTTON, (int)Buttons.B);
         }
 
         public bool AddMapping(Button button, MappingType type, uint id, int dir = 1)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace HyperDigger
 {
-    abstract class PhysicsBody : Sprite
+    public abstract class PhysicsBody : Sprite
     {
         public Collider Collider;
 
@@ -20,9 +21,9 @@ namespace HyperDigger
             return Collider.CollidesWith(x, y, other);
         }
 
-        public override void Draw()
+        public override void Draw(SpriteBatch spriteBatch)
         {
-            base.Draw();
+            base.Draw(spriteBatch);
             // Draw debug colliders.
             if (!Global.DebugDraw) return;
             // Draw collider
@@ -33,10 +34,10 @@ namespace HyperDigger
                 var w = Collider.BoundarySize.X * 2;
                 var h = Collider.BoundarySize.Y * 2;
                 var rect = new Rectangle((int)sx, (int)sy, (int)w, (int)h);
-                Global.Graphics.DrawRectangle(rect, new Color(64, 160, 224, 64));
+                Global.Graphics.DrawRectangle(spriteBatch, rect, new Color(64, 160, 224, 64));
             }
             // Draw origin
-            Global.Graphics.DrawDot(GlobalPosition, Color.IndianRed);
+            Global.Graphics.DrawDot(spriteBatch, GlobalPosition, Color.IndianRed);
         }
     }
 }

@@ -1,13 +1,14 @@
 ﻿using LDtk;
 using LDtk.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 
 namespace HyperDigger
 {
-    class TilemapLevel
+    public class TilemapLevel
     {
         public TilemapWorld World { get; private set; }
         LDtkLevel Level;
@@ -15,8 +16,14 @@ namespace HyperDigger
         Sprite[] Layers = new Sprite[0];
         List<GameObject> Entities = new List<GameObject>();
         List<EntityInstance> EntityInstances = new List<EntityInstance>();
+        Texture2D _minimap;
+        List<GameObject> _toDestroy = new List<GameObject>();
+        public string DisplayName {get;private set;}
 
         bool IsActive;
+        Color MMAP_EMPTY = new Color(32, 32, 32);
+        Color MMAP_BLOCK = new Color(64, 64, 64);
+        Color MMAP_WATER = new Color(16, 32, 96);
 
         public string Identifier { get { return Level.Identifier; } }
 
@@ -24,6 +31,20 @@ namespace HyperDigger
             World = world;
             Level = level;
             Renderer = renderer;
+            DisplayName = "";
+            foreach (var f in Level.FieldInstances)
+            {
+                switch (f._Identifier)
+                {
+                    case "DisplayName":
+                        if (f._Type=="String")
+                        {
+                            DisplayName = f._Value.ToString();
+                        }
+                        break;
+                }
+            }
+            System.Console.WriteLine(DisplayName);
             //Level.LayerInstances[0]._Identifier;
             Layers = new Sprite[Level.LayerInstances.Length];
             //l.Layers;
@@ -61,6 +82,7 @@ namespace HyperDigger
                     EntityInstances.AddRange(layer.EntityInstances);
                 }
             }
+            GenerateMinimap();
         }
 
         public void Set(Container v)
@@ -107,7 +129,23 @@ namespace HyperDigger
             return (x >= cx && y > cy) && (x < cw && y < ch);
         }
 
-        internal bool CheckCollisionWithEntities(int cx, int cy, Collider other)
+        public List<GameObject> CheckCollisionWithAllEntities(int cx, int cy, Collider other)
+        {
+            var ary = new List<GameObject>();
+
+            foreach (var entity in Entities)
+            {
+                if (entity == other.Parent) continue;
+                if (entity is PhysicsBody)
+                {
+                    var collider = entity as PhysicsBody;
+                    if (collider.CollidesWith(cx, cy, other)) ary.Add(entity);
+                }
+            }
+
+            return ary;
+        }
+        internal GameObject CheckCollisionWithEntities(int cx, int cy, Collider other)
         {
             foreach (var entity in Entities)
             {
@@ -115,10 +153,10 @@ namespace HyperDigger
                 if (entity is PhysicsBody)
                 {
                     var collider = entity as PhysicsBody;
-                    if (collider.CollidesWith(cx, cy, other)) return true;
+                    if (collider.CollidesWith(cx, cy, other)) return entity;
                 }
             }
-            return false;
+            return null;
         }
 
         public bool CheckCollisionWithTileAtPosition(int x, int y)
@@ -219,8 +257,17 @@ namespace HyperDigger
         {
             foreach(var entity in Entities)
             {
-                entity.Update(gameTime);
+                if (entity.Destroyed)
+                {
+                    _toDestroy.Add(entity);
+                }
+                else
+                {
+                    entity.Update(gameTime);
+                }
             }
+            foreach(var d in _toDestroy) Entities.Remove(d);
+            _toDestroy.Clear();
 #if DEBUG
             if (Global.Input.IsTriggered(Input.Button.ESCAPE))
             {
@@ -247,6 +294,49 @@ namespace HyperDigger
                 ids[i] = GetTileId(Level.LayerInstances[i], localX, localY);
             }
             return ids;
+        }
+
+        private void GenerateMinimap()
+        {
+            _minimap = new Texture2D(Global.Graphics.SpriteBatch.GraphicsDevice, Level.Size.X / 16, Level.Size.Y / 16);
+            Color[] _data = new Color[_minimap.Width * _minimap.Height];
+            _minimap.GetData(_data);
+
+            for (int i = 0; i < _data.Length; i++)
+            {
+                bool _drawn = false;
+                foreach (var l in Level.LayerInstances)
+                {
+                    if (l._Type == LayerType.IntGrid)
+                    {
+                        if (i < l.IntGridCsv.Length)
+                        {
+                            var t = l.IntGridCsv[i];
+                            switch (t)
+                            {
+                                case 1:
+                                case 3:
+                                    _data[i] = MMAP_BLOCK;
+                                    _drawn = true;
+                                    break;
+                                case 2:
+                                    _data[i] = MMAP_WATER;
+                                    _drawn = true;
+                                    break;
+                            }
+                        }
+                    }
+                }
+                if (!_drawn) _data[i] = MMAP_EMPTY;
+            }
+            _minimap.SetData(_data);
+        }
+
+        public Texture2D GetMinimap() { return _minimap; }
+
+        internal Vector2 GetPosition()
+        {
+            return new Vector2(Level.WorldX, Level.WorldY);
         }
     }
 }

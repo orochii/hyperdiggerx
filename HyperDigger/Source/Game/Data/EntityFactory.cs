@@ -1,10 +1,8 @@
 ﻿using LDtk;
+using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using static Assimp.Metadata;
+using System.ComponentModel;
 
 namespace HyperDigger
 {
@@ -26,9 +24,29 @@ namespace HyperDigger
                     object instance = Activator.CreateInstance(eType, container, world, entity);
                     return instance as GameObject;
                 }
-                catch (Exception ex) { }
+                catch (Exception ex) {
+                    System.Console.WriteLine(ex.StackTrace);
+                }
             }
             
+            return null;
+        }
+
+        public static GameObject CreateCardEntity(string type, GameObject owner, Vector2 position)
+        {
+            if (type.Length != 0)
+            {
+                try
+                {
+                    Type eType = Type.GetType("HyperDigger.CardTypes." + type);
+                    object instance = Activator.CreateInstance(eType, owner.Container, owner, position);
+                    return instance as GameObject;
+                }
+                catch (Exception ex) {
+                    System.Console.WriteLine(ex.StackTrace);
+                }
+            }
+
             return null;
         }
     }

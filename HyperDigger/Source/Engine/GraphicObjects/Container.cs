@@ -1,17 +1,44 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace HyperDigger
 {
-    class Container : GameObject
+    public class Container : GameObject
     {
         private List<GameObject> _graphicObjects = new List<GameObject>();
+        private SpriteBatch _innerSpriteBatch;
+        private RenderTarget2D _innerTarget;
+        protected Rectangle _rectangle;
 
-        public Container() {}
-        public Container(Container _containerr = null)
+        public Rectangle Rectangle
         {
-            Container = _containerr;
+            get { return _rectangle; }
+            set
+            {
+                _rectangle = value;
+                _innerTarget = new RenderTarget2D(_innerSpriteBatch.GraphicsDevice, _rectangle.Width, _rectangle.Height);
+            }
+        }
+
+        public Container(Rectangle r, Container _container = null)
+        {
+            Container = _container;
+            CreatePrivateMembers(r);
+        }
+        public Container(Container _container = null)
+        {
+            Container = _container;
+            CreatePrivateMembers(new Rectangle(new Point(0, 0), new Point(Global.Graphics.Width, Global.Graphics.Height)));
+        }
+
+        private void CreatePrivateMembers(Rectangle rectangle)
+        {
+            _rectangle = rectangle;
+            _innerSpriteBatch = Global.Graphics.CreateSpriteBatch();
+            _innerTarget = new RenderTarget2D(_innerSpriteBatch.GraphicsDevice, _rectangle.Width, _rectangle.Height);
         }
 
         public void AddGO(GameObject go) {
@@ -33,17 +60,34 @@ namespace HyperDigger
             }
         }
 
-        public override void Draw()
+        public override void Predraw()
         {
+            if (!Visible) return;
+
             foreach (GameObject obj in _graphicObjects)
             {
-                //System.Console.WriteLine(obj.ToString());
-                obj.Draw();
+                obj.Predraw();
             }
-            //System.Console.WriteLine("END");
+
+            _innerSpriteBatch.GraphicsDevice.SetRenderTarget(_innerTarget);
+            _innerSpriteBatch.GraphicsDevice.Clear(Color.Transparent);
+            _innerSpriteBatch.Begin(SpriteSortMode.Deferred, Global.Graphics.BlendMode, SamplerState.PointClamp);
+            foreach (GameObject obj in _graphicObjects)
+            {
+                obj.Draw(_innerSpriteBatch);
+            }
+            _innerSpriteBatch.End();
         }
 
-        private void SortGO()
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            if (!Visible) return;
+
+            // Draw container
+            spriteBatch.Draw(_innerTarget, new Vector2(_rectangle.X, _rectangle.Y), Color.White);
+        }
+
+        public void SortGO()
         {
             _graphicObjects.Sort(CompareGOs);
         }

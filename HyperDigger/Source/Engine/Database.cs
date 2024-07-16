@@ -9,5 +9,6 @@ namespace HyperDigger
     class Database
     {
         public Animations Animations = new Animations();
+        public Cards Cards = new Cards();
     }
 }

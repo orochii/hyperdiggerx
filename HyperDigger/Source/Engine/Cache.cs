@@ -1,4 +1,5 @@
 ﻿using FmodForFoxes;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -11,10 +12,12 @@ namespace HyperDigger
 
         Dictionary<string, Texture2D> cachedTextures;
         Dictionary<string, Sound> cachedSounds;
+        Dictionary<string, SpriteFont> cachedFonts;
 
         public Cache() {
             cachedTextures = new Dictionary<string, Texture2D>();
             cachedSounds = new Dictionary<string, Sound>();
+            cachedFonts = new Dictionary<string, SpriteFont>();
         }
 
         public Texture2D LoadTexture(string path)
@@ -31,6 +34,14 @@ namespace HyperDigger
             var newSound = CoreSystem.LoadStreamedSound(path);
             cachedSounds.Add(path, newSound);
             return newSound;
+        }
+
+        public SpriteFont LoadFont(string path)
+        {
+            if (cachedFonts.TryGetValue(path, out var font)) {  return font; }
+            var newFont = content.Load<SpriteFont>(path);
+            cachedFonts.Add(path, newFont);
+            return newFont;
         }
 
         public void FlushAll()

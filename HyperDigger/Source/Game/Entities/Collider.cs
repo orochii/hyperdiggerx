@@ -3,7 +3,7 @@ using System;
 
 namespace HyperDigger
 {
-    internal class Collider
+    public class Collider
     {
         public const int BOUND_UNIT = 4;
 
@@ -36,7 +36,7 @@ namespace HyperDigger
             float yThis = OffsetY(Parent.Position.Y);
             float deltaX = Math.Abs(xOther - xThis);
             float deltaY = Math.Abs(yOther - yThis);
-            return (deltaX < otherSizeX + thisSizeX) && (deltaY < otherSizeY + thisSizeY);
+            return (deltaX <= otherSizeX + thisSizeX) && (deltaY <= otherSizeY + thisSizeY);
         }
 
         public float OffsetX(float x)

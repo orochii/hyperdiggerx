@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 
 namespace HyperDigger
 {
@@ -12,7 +13,8 @@ namespace HyperDigger
         }
         public void Draw()
         {
-            Container.Draw();
+            Container.Predraw();
+            Container.Draw(Global.Graphics.SpriteBatch);
         }
 
         /* public void Setup(params) {} */

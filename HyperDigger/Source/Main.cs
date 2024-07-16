@@ -23,6 +23,7 @@ namespace HyperDigger
             Global.Cache.content = Content;
             WorldScene startScene = new WorldScene();
             Global.SceneStack.AddScene(startScene);
+            Window.Title = "Lost Savior";
         }
 
         protected override void Update(GameTime gameTime)

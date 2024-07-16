@@ -2,8 +2,10 @@
 
 namespace HyperDigger.Entities;
 
-class Goblin : MovingBody
+class Goblin : MovingBody, IDamageable
 {
+    int Health = 40;
+
     public Goblin(Container container, TilemapWorld world, LDtk.EntityInstance entity) : base(container)
     {
         World = world;
@@ -17,14 +19,21 @@ class Goblin : MovingBody
         Origin = new Vector2(16, 32 + 1);
         Collider.BoundarySize = new Vector2(6, 10);
         Collider.Offset = new Vector2(0, -10);
-
-        System.Console.WriteLine("{0} : pos {1}", Name, Position);
     }
 
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
+    }
 
-        System.Console.WriteLine("{0} : pos {1}", Name, Position);
+    public void DoDamage(GameObject source, int damage)
+    {
+        if (source != null)
+        {
+            var delta = Position - source.Position;
+            Speed += delta;
+        }
+        Health -= damage;
+        System.Console.WriteLine("Goblin receives {0} damage. Remaining: {1}", damage, Health);
     }
 }

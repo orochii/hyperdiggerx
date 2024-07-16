@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace HyperDigger
 {
-    internal class Player : MovingBody
+    internal class Player : MovingBody, IDamageable
     {
         /*
          * JUMP TODO:
@@ -21,11 +21,11 @@ namespace HyperDigger
          */
 
         const float WALK_SPEED = 128f;
-        const float WALK_ACCEL = 800f;
-        const float DEACCEL = 720f;
+        const float WALK_ACCEL = 880f;
+        const float DEACCEL = 760f;
         const float JUMP_FORCE = 320f;
         const float COYOTE_TIME = 0.1f;
-        const float APEX_RANGE = 1.0f;
+        const float APEX_RANGE = 32.0f;
         const float APEX_MULTIPLIER = 0.6f;
         private const float JUMP_BUFFER_TIME = 0.1f;
 
@@ -59,7 +59,18 @@ namespace HyperDigger
             var jumpHeld = Global.Input.IsPressed(Input.Button.JUMP);
             if (jump) jumpRequest = JUMP_BUFFER_TIME;
             var prevState = GetCurrentAnimState();
-            
+
+            if (Global.Input.IsTriggered(Input.Button.SKILL_L)) UseCard(0);
+            else if (Global.Input.IsTriggered(Input.Button.SKILL_U)) UseCard(1);
+            else if (Global.Input.IsTriggered(Input.Button.SKILL_D)) UseCard(2);
+            else if (Global.Input.IsTriggered(Input.Button.SKILL_R)) UseCard(3);
+
+            if (Global.Input.IsTriggered(Input.Button.DRAW))
+            {
+                // Draw.
+                Global.State.Deck.PullCard();
+            }
+
             // Advance/reset coyote time
             if (IsGrounded) coyoteTime = COYOTE_TIME;
             else if (coyoteTime > 0) coyoteTime -= d;
@@ -155,10 +166,33 @@ namespace HyperDigger
                 if (state.events.TryGetValue(_lastFrame, out var ev))
                 {
                     Global.Audio.PlaySFXAt(ev.name, ev.volume, ev.pitch, GlobalPosition);
-                    System.Console.WriteLine("Play sound {0}", ev.name);
                 }
             }
         }
 
+        private void UseCard(int idx)
+        {
+            var hand = Global.State.Deck.Hand;
+            if (hand.Count > idx)
+            {
+                var cardIdx = hand[idx];
+                Global.State.Deck.Mill(idx);
+
+                Card card = Global.Database.Cards.Get(cardIdx);
+                if (card != null)
+                {
+                    int dir = (Effects == SpriteEffects.FlipHorizontally) ? -1 : 1;
+                    Vector2 position = Position + new Vector2(card.Offset.X * dir, card.Offset.Y);
+                    var c = EntityFactory.CreateCardEntity(card.EntityName, this, position);
+
+                    Global.Audio.PlaySFXAt("step.ogg", 1, 1, GlobalPosition);
+                }
+            }
+        }
+
+        public void DoDamage(GameObject source, int damage)
+        {
+            System.Console.WriteLine("Player receives {0} damage", damage);
+        }
     }
 }

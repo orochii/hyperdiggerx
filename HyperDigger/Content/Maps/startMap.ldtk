@@ -11,7 +11,7 @@
 	"iid": "36580c50-25d0-11ef-ac01-e154e70f97ac",
 	"jsonVersion": "1.5.3",
 	"appBuildId": 473703,
-	"nextUid": 516,
+	"nextUid": 517,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": null,
@@ -5817,7 +5817,45 @@
 			"savedSelections": [],
 			"cachedPixelData": { "opaqueTiles": "1111111111111111", "averageColors": "f6cef2bef2bef2bef6cef5bef7cef7cef2bef2bef2bef2bef2bef2bef2bef2be" }
 		}
-	], "enums": [], "externalEnums": [], "levelFields": [] },
+	], "enums": [], "externalEnums": [], "levelFields": [
+		{
+			"identifier": "DisplayName",
+			"doc": "Name of the level displayed in game",
+			"__type": "String",
+			"uid": 516,
+			"type": "F_String",
+			"isArray": false,
+			"canBeNull": true,
+			"arrayMinLength": null,
+			"arrayMaxLength": null,
+			"editorDisplayMode": "ValueOnly",
+			"editorDisplayScale": 1,
+			"editorDisplayPos": "Above",
+			"editorLinkStyle": "StraightArrow",
+			"editorDisplayColor": "#FFAC00",
+			"editorAlwaysShow": false,
+			"editorShowInWorld": true,
+			"editorCutLongValues": true,
+			"editorTextSuffix": null,
+			"editorTextPrefix": null,
+			"useForSmartColor": false,
+			"exportToToc": false,
+			"searchable": false,
+			"min": null,
+			"max": null,
+			"regex": null,
+			"acceptFileTypes": null,
+			"defaultOverride": null,
+			"textLanguageMode": null,
+			"symmetricalRef": false,
+			"autoChainRef": true,
+			"allowOutOfLevelRef": true,
+			"allowedRefs": "OnlySame",
+			"allowedRefsEntityUid": null,
+			"allowedRefTags": [],
+			"tilesetUid": null
+		}
+	] },
 	"levels": [],
 	"worlds": [{ "iid": "36580c51-25d0-11ef-ac01-3573efbd9a6b", "identifier": "World", "defaultLevelWidth": 256, "defaultLevelHeight": 256, "worldGridWidth": 256, "worldGridHeight": 256, "worldLayout": "Free", "levels": [
 		{
@@ -5839,7 +5877,10 @@
 			"__smartColor": "#ADADB5",
 			"__bgPos": null,
 			"externalRelPath": null,
-			"fieldInstances": [],
+			"fieldInstances": [{ "__identifier": "DisplayName", "__type": "String", "__value": "???", "__tile": null, "defUid": 516, "realEditorValues": [{
+				"id": "V_String",
+				"params": ["???"]
+			}] }],
 			"layerInstances": [
 				{
 					"__identifier": "Entities",
@@ -6543,7 +6584,10 @@
 			"__smartColor": "#ADADB5",
 			"__bgPos": null,
 			"externalRelPath": null,
-			"fieldInstances": [],
+			"fieldInstances": [{ "__identifier": "DisplayName", "__type": "String", "__value": "???", "__tile": null, "defUid": 516, "realEditorValues": [{
+				"id": "V_String",
+				"params": ["???"]
+			}] }],
 			"layerInstances": [
 				{
 					"__identifier": "Entities",
@@ -7428,7 +7472,10 @@
 			"__smartColor": "#ADADB5",
 			"__bgPos": null,
 			"externalRelPath": null,
-			"fieldInstances": [],
+			"fieldInstances": [{ "__identifier": "DisplayName", "__type": "String", "__value": "The Caves", "__tile": null, "defUid": 516, "realEditorValues": [{
+				"id": "V_String",
+				"params": ["The Caves"]
+			}] }],
 			"layerInstances": [
 				{
 					"__identifier": "Entities",
@@ -8120,7 +8167,10 @@
 			"__smartColor": "#ADADB5",
 			"__bgPos": null,
 			"externalRelPath": null,
-			"fieldInstances": [],
+			"fieldInstances": [{ "__identifier": "DisplayName", "__type": "String", "__value": "The Caves", "__tile": null, "defUid": 516, "realEditorValues": [{
+				"id": "V_String",
+				"params": ["The Caves"]
+			}] }],
 			"layerInstances": [
 				{
 					"__identifier": "Entities",
@@ -8709,7 +8759,10 @@
 			"__smartColor": "#ADADB5",
 			"__bgPos": null,
 			"externalRelPath": null,
-			"fieldInstances": [],
+			"fieldInstances": [{ "__identifier": "DisplayName", "__type": "String", "__value": "Road to Summit", "__tile": null, "defUid": 516, "realEditorValues": [{
+				"id": "V_String",
+				"params": ["Road to Summit"]
+			}] }],
 			"layerInstances": [
 				{
 					"__identifier": "Entities",
