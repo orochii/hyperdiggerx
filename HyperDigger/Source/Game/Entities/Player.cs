@@ -29,6 +29,7 @@ namespace HyperDigger
         const float APEX_MULTIPLIER = 0.6f;
         private const float JUMP_BUFFER_TIME = 0.1f;
 
+        public bool IsPulling = false;
         bool IsJumping = false;
         float jumpRequest = 0;
         float coyoteTime = 0;
@@ -60,6 +61,8 @@ namespace HyperDigger
             if (jump) jumpRequest = JUMP_BUFFER_TIME;
             var prevState = GetCurrentAnimState();
 
+            Global.State.Deck.Update(gameTime);
+
             if (Global.Input.IsTriggered(Input.Button.SKILL_L)) UseCard(0);
             else if (Global.Input.IsTriggered(Input.Button.SKILL_U)) UseCard(1);
             else if (Global.Input.IsTriggered(Input.Button.SKILL_D)) UseCard(2);
@@ -67,8 +70,11 @@ namespace HyperDigger
 
             if (Global.Input.IsTriggered(Input.Button.DRAW))
             {
-                // Draw.
-                Global.State.Deck.PullCard();
+                if (Global.State.Deck.CanDraw())
+                {
+                    // Draw.
+                    IsPulling = true;
+                }
             }
 
             // Advance/reset coyote time
@@ -172,21 +178,14 @@ namespace HyperDigger
 
         private void UseCard(int idx)
         {
-            var hand = Global.State.Deck.Hand;
-            if (hand.Count > idx)
+            Card card = Global.State.Deck.Use(idx);
+            if (card != null)
             {
-                var cardIdx = hand[idx];
-                Global.State.Deck.Mill(idx);
+                int dir = (Effects == SpriteEffects.FlipHorizontally) ? -1 : 1;
+                Vector2 position = Position + new Vector2(card.Offset.X * dir, card.Offset.Y);
+                var c = EntityFactory.CreateCardEntity(card.EntityName, this, position);
 
-                Card card = Global.Database.Cards.Get(cardIdx);
-                if (card != null)
-                {
-                    int dir = (Effects == SpriteEffects.FlipHorizontally) ? -1 : 1;
-                    Vector2 position = Position + new Vector2(card.Offset.X * dir, card.Offset.Y);
-                    var c = EntityFactory.CreateCardEntity(card.EntityName, this, position);
-
-                    Global.Audio.PlaySFXAt("step.ogg", 1, 1, GlobalPosition);
-                }
+                //Global.Audio.PlaySFXAt("step.ogg", 1, 1, GlobalPosition);
             }
         }
 

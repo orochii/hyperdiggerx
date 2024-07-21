@@ -19,13 +19,14 @@ namespace HyperDigger
             Player.Position = new Vector2(64, 176);
             World.AddEntity(Player);
             World.ViewTarget = Player;
+            Player.Unstuck();
             // Create UI
             UI = new WorldHUD(Container);
             UI.SetLevel(World.CurrentLevel);
             UI.Player = Player;
             World.OnCurrentLevelChange += OnCurrentLevelChange;
             // Play musics
-            Global.Audio.PlayBGM("That Zen Moment.mp3");
+            //Global.Audio.PlayBGM("That Zen Moment.mp3");
         }
 
         private void OnCurrentLevelChange(TilemapLevel l)

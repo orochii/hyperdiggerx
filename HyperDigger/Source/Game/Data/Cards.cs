@@ -17,6 +17,7 @@ namespace HyperDigger
         public EType Type;
         public string EntityName;
         public Vector2 Offset;
+        public int Energy;
     }
 
     class Cards
@@ -30,7 +31,14 @@ namespace HyperDigger
                     Description = "", 
                     Type = Card.EType.SUMMON, 
                     EntityName = "Tower",
-                    Offset = new Vector2(32, 16) }
+                    Offset = new Vector2(32, 16),
+                    Energy = 5},
+                new Card() { Name = "TowerTest",
+                    Description = "",
+                    Type = Card.EType.ATTACK,
+                    EntityName = "Tower",
+                    Offset = new Vector2(32, 16),
+                    Energy = 5},
             };
             for (int i = 0; i < _cards.Length; i++)
             {
@@ -40,7 +48,7 @@ namespace HyperDigger
 
         internal Card Get(int cardIdx)
         {
-            if (cardIdx < _cards.Length)
+            if (cardIdx < _cards.Length && cardIdx >= 0)
             {
                 return _cards[cardIdx];
             }

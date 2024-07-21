@@ -12,7 +12,7 @@ namespace HyperDigger
 
         public float Angle;
         public int CardIdx = -1;
-        public float Percent = 1f;
+        public float Percent = 0f;
 
         Texture2D texture;
         Texture2D _burnTexture;
@@ -48,12 +48,14 @@ namespace HyperDigger
             int cardY = CARD_HEIGHT * (CardIdx / _cardCols);
             if (Angle != 0)
             {
+                Vector2 middleOrigin = new Vector2(CARD_WIDTH / 2, CARD_HEIGHT / 2);
+                Vector2 offsetPosition = intPosition + middleOrigin;
                 Rectangle bottomSrc = new Rectangle(cardX, cardY, CARD_WIDTH, CARD_HEIGHT);
-                spriteBatch.Draw(texture, intPosition, bottomSrc, Color.DarkSlateGray, Angle, new Vector2(CARD_WIDTH/2, CARD_HEIGHT/2), Vector2.One, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, offsetPosition, bottomSrc, Color.White, Angle, middleOrigin, Vector2.One, SpriteEffects.None, 0);
             }
             else
             {
-                int divide = (int)(CARD_HEIGHT * (1f - Percent));
+                int divide = (int)(CARD_HEIGHT * Percent);
                 // Draw bottom part
                 Rectangle bottomSrc = new Rectangle(cardX, cardY, CARD_WIDTH, divide);
                 spriteBatch.Draw(texture, intPosition, bottomSrc, Color.DarkSlateGray, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
@@ -62,7 +64,7 @@ namespace HyperDigger
                 Rectangle topSrc = new Rectangle(bottomSrc.X, bottomSrc.Y + divide, CARD_WIDTH, CARD_HEIGHT - divide);
                 spriteBatch.Draw(texture, topStart, topSrc, Color.White, 0, Vector2.Zero, Vector2.One, SpriteEffects.None, 0);
                 // Draw burning texture
-                if (Percent < 1f)
+                if (Percent > 0f)
                 {
                     int f = (int)burnAnimState;
                     Rectangle burnSrc = new Rectangle(0,f*4,32,4);
